@@ -1,0 +1,134 @@
+;%_N_PAR_INI5_SPF
+;$PATH=/_N_CST_DIR
+;星期日 2012年01月16日
+;外圆磨程序
+
+
+R104=R34+R36*R103  ;磨削工件右端坐标
+R105=R35-R37*R103  ;磨削工件左端坐标
+
+ZUOYOU=R102
+
+R200=R101*R103; Screw-pitches
+R202=360
+IF R117>0.81 GOTOF ERROR1
+IF R121>0.71 GOTOF ERROR2
+IF R125>0.61 GOTOF ERROR3
+IF R129>0.51 GOTOF ERROR4
+IF R166>0.51 GOTOF ERROR5
+IF R170>0.51 GOTOF ERROR6
+
+R208=360/R101;Angle/teeth
+Z_MID=(R104+R105)/2
+R218=ABS(R104-R105)
+R48=ABS(R34-R35)
+R203=R218/R200
+
+IF R107<>0
+R209=R107/R203;Pitch LEC offset
+ELSE
+R209=0
+ENDIF
+IF R102==1; Right direction 
+R210=R104; Grinding right position
+R211=R105; Grinding left position
+R221=-ABS((R65/360)*R103)        ;右螺纹一段起点C增量对应Z
+R222=-ABS((R62/360)*R103)        ;右螺纹二段起点C增量对应Z
+R50=R34-0*R103     ;0.25*R103   ;R34工件右端对刀坐标Z
+R51=R35        ;R35工件左端对刀坐标Z
+R30=R61                          ;右螺纹一段起点X轴
+R31=R60                          ;右螺纹	二段起点X轴
+ELSE; Left direction 
+R210=R105; Left grinding start position
+R211=R104; Left grinding end position
+R221=ABS((R62/360)*R103)        ;左螺纹一段起点C增量对应Z
+R222=ABS((R65/360)*R103)        ;左螺纹二段起点C增量对应Z
+R50=R35+0*R103  ;0.25*R103  
+R51=R34
+R30=R60                         ;左螺纹一段起点X轴
+R31=R61                         ;左螺纹二段起点X轴
+ENDIF
+
+
+
+;R158=R158
+
+
+R212=R200+R209
+R216=R218/R212
+Z_DIS=-(R102*R218)
+ANG0=360*R216
+;;;;XXXXX G_FEED=R128*R200
+
+R223=Z_DIS-R222   ;-R221
+R49=-R102*R48-R222
+
+
+;R226=(YDL/R103)*360
+R226=(YDL/R103-TRUNC(YDL/R103))*360  ;;GAI 20120117
+MAK2:
+IF R226<360
+R226=R226+360
+ENDIF
+R227=0     ;; JIA  20120117
+;;R227=((SHK-YDL)/R103)*360  ;;GAI 20120117屏蔽
+;;MAK4:
+;;IF R227>=360                   ;;GAI 20120117屏蔽
+;;R227=R227-360            ;;GAI 20120117屏蔽
+;;GOTOB MAK4               ;;GAI 20120117屏蔽
+;;ENDIF                          ;;GAI 20120117屏蔽
+
+IF R102==1
+R224=ANG0-R62-R227
+ELSE
+R224=ANG0-R65-R227
+ENDIF
+R225=R224
+
+MAK1:
+IF R225>=360
+R225=R225-360
+GOTOB MAK1
+ENDIF
+R325=R324+R226  ;右半扣C起点
+MAK3:
+IF R325>=360
+R325=R325-360
+GOTOB MAK3
+ENDIF
+
+GOTOF END
+
+ERROR1:
+;MSG("1:工序，进给深度>0.81超出范围,请重新输入 !!!!")
+MSG("1:procedure: Depth of cut>0.81, error, please input again")
+M0
+GOTOF END
+ERROR2:
+;MSG("2:工序，进给深度>0.71,超出范围,请重新输入 !!!!")
+MSG("2:procedure: Depth of cut>0.71, error, please input again")
+M0
+GOTOF END
+ERROR3:
+;MSG("3:工序，进给深度>0.61超出范围,请重新输入 !!!!")
+MSG("3:procedure: Depth of cut>0.61, error, please input again")
+M0
+GOTOF END
+ERROR4:
+;MSG("4:工序，进给深度>0.51超出范围,请重新输入 !!!!")
+MSG("4:procedure: Depth of cut>0.51, error, please input again")
+M0
+GOTOF END
+ERROR5:
+;MSG("5:工序，进给深度>0.41超出范围,请重新输入 !!!!")
+MSG("5:procedure: Depth of cut>0.41, error, please input again")
+M0
+GOTOF END
+ERROR6:
+;MSG("6:工序，进给深度>0.31超出范围,请重新输入 !!!!")
+MSG("6:procedure: Depth of cut>0.31, error, please input again")
+M0
+
+END:M17
+
+

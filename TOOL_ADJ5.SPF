@@ -1,0 +1,42 @@
+;%_N_TOOL_ADJ5_SPF
+;$PATH=/_N_CST_DIR
+;星期日 2012年01月26日
+
+DRFOF
+
+N10 ;对刀子程序
+N20 MARK1:
+N30 G300
+
+N35 G90 G01 X=R108 F=R115   ;螺纹磨削起点！！！
+
+
+;;N50 C=ACP(0) F=3600 
+;N60 MSG("正在对刀,结束后请将DRF功能关闭!!!! ")
+;N61 MSG("is  beiching  ,when over please shut " DRF " !!!! ")
+
+N130 G301      ;螺纹磨削起点对刀
+
+N150 RETRACT  ;砂轮架后退!!!
+N160 G4 F0.1
+N170 STOPRE
+
+N200 R131=$AC_DRF[X]   R133=$AC_DRF[Z]
+N210 R159=R102*R133*360/R212
+
+N220 R158=R108+R131      
+
+
+N230 STOPRE
+N240 CORROF(Z,"DRF")
+N250 CORROF(X,"DRF")
+N260 R156=R157
+
+N300 R106=12345
+;N310 MSG("对刀结束,请关闭对刀键,按启动键,继续启动程序进行磨削!!!")
+;N311 MSG("beiching is over,  please shut " DRF " ,  and then start again !!!! ")
+;M29      ;对刀结束，对刀键灯自动灭
+N320 M0
+
+N330 END:M17
+

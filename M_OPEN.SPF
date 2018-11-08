@@ -1,0 +1,23 @@
+;$PATH=/_N_CST_DIR
+
+M8 ;冷却启
+;M12   ;吸尘启
+M2=3 S2=R12 ;？？
+MARK0:
+;IF $A_IN[4]==0
+;MSG("砂轮没有启动，请启动砂轮! ! !")
+;GOTOB MARK0
+ENDIF
+
+IF TY1==0
+R185=0
+TY1=1
+ENDIF
+MARK1:
+IF R177<300 
+MSG("砂轮直径太小,请更换新砂轮! ! !")
+GOTOB MARK1
+ENDIF
+
+M17
+

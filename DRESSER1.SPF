@@ -1,0 +1,190 @@
+;$PATH=/_N_SPF_DIR
+;[2009/12/30] SK7140修整程序
+;星期四 2011年7月7日改编
+;2012年01月24日 增加1个程序：L713-多线无大经  
+
+R311=0   ;取消大径锥度调整量  CH2-R311  2012-01-31
+
+R160=DTIMES;粗修次数
+R162=DSPEED;粗修速度F
+R164=DCUT;粗修整量
+
+R41=DTIMES;当前修整次数
+R35=DSPEED;当前修整速度
+R36=DCUT;当前修整进给量
+
+IF DTIMES==0 GOTOF END1;当前修整次数为0，跳出，结束程序
+ANG3=R180;工件锥度
+SHK=R176;砂轮宽度
+;LUOJU=R30;齿型螺距
+
+
+
+IF R160==0 GOTOB END;当前修整次数为0，跳出，结束程序
+
+IF R164>0.11 GOTOF ERROR1;如果粗修整量大于0.11，提示错误信息
+IF R165>0.09 GOTOF ERROR2;如果粗修整量大于0.11，提示错误信息
+
+;新砂轮抬刀
+IF R150==0;如果是新砂轮
+   R166=R168+R176/3  ;新砂轮修整时V
+   R185=0 GT1=0;砂轮修整累计清零
+ENDIF
+
+L_SPEED;砂轮速度计算子程序
+
+M10  ;砂轮启动
+
+MARK0:             ;判断砂轮是否启动
+
+IF $A_IN[4]==0
+   ;MSG("砂轮没有启动，请启动砂轮! ! !")
+   MSG("wheel is not running ，please start it ! ! !")
+   GOTOB MARK0
+ENDIF
+
+STOPRE
+
+M23 M8   ;修整轮启  修整冷却启
+
+MARK1:   ;判断修整轮是否启动
+IF $A_IN[5]==0
+   MSG("修整轮没有启动，请启动修整轮! ! !")
+   MSG("disk is not running ，please start it ! ! !")
+   GOTOB MARK1
+ENDIF
+
+
+G4 F3
+
+M12  M10  ;S=SPEED  ;吸尘启 砂轮启 SPEED=R201
+
+ANG3=R180   ;工件锥度
+INT0=0
+
+M_OPEN
+
+START0: 
+CASE (R151) OF 1 GOTOF START1 2 GOTOF START2 3 GOTOF START3 4 GOTOF START4  5 GOTOF START5 6 GOTOF START6 7 GOTOF START7 8 GOTOF START8  9 GOTOF START9  10 GOTOF START10  11 GOTOF START11  12 GOTOF START12    13 GOTOF START13    DEFAULT GOTOF ERROR3
+
+START1:  ;V-W单滚轮
+
+L701 ;尖三角  ;L401
+CXM="L701"
+GOTOF START19
+
+START2:  
+L702
+CXM="L702"
+GOTOF START19
+
+START3:                       
+L703 
+CXM="L703"
+GOTOF START19
+
+START4:                       
+L704; ;
+CXM="L704"
+GOTOF START19
+
+START5:                       
+L705 ;
+CXM="L705"
+GOTOF START19
+
+START6:                       
+L706  ;
+CXM="L706"
+GOTOF START19
+
+START7:                       
+L707  ;
+CXM="L707"
+GOTOF START19
+
+START8:                       
+L708  ;
+CXM="L708"
+GOTOF START19
+
+START9:                       
+L709  ;
+CXM="L709"
+GOTOF START19
+
+START10:                       
+L710  ;
+CXM="L710"
+GOTOF START19
+
+START11:                       
+L711  ;
+CXM="L711"
+GOTOF START19
+
+START12:                       
+L712  ;
+CXM="L712"
+GOTOF START19
+
+START13:                       
+L713  ;
+CXM="L713"
+
+
+START19: 
+
+TRANS
+
+M_CLOSE
+
+IF INT0==1
+   M13  ; 吸尘停
+ENDIF
+
+
+INT0=1
+
+;R201=R203  改 屏蔽: R201砂轮转速；R203修整轮转速；
+M24
+M17;子程序结束
+
+
+;;;错误提示区1
+ERROR1:
+;MSG("粗修整进给量>0.31,请重新输入!!!")
+MSG("depth of cut>0.11,please iput again !!!")
+
+
+M0
+;;;错误提示区2
+ERROR2:
+;MSG("精修整进给量>0.21,请重新输入!!!")
+MSG("depth of cut>0.09,please iput again !!!")
+
+
+M0
+
+;;;错误提示区3
+ERROR3:
+;MSG("齿型选择有误,请重新输入!!!")
+MSG("Error of Type, please input it again  ")
+
+
+M0
+
+
+END:
+
+;CHIGAO=R181
+TRANS
+
+G90 G01 V5 F1000
+W-18  ;金钢轮抬到安全位置
+M24
+END1:
+INT0=1
+M2
+
+

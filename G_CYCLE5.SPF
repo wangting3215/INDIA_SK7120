@@ -1,0 +1,100 @@
+;$PATH=/_N_CST_DIR
+;外圆磨程序
+
+
+
+N40 R246=R238  ;进刀量
+
+
+N60 BEGIN1:
+N70 R242=0 R253=0 R248=0;
+N80 G_FEED=R237*R200; Feed speed
+
+N90 STEP1:
+N100 M08
+
+N120 R324=R135 ;=0  C轴起始角
+N130 BEGIN2:
+N140 IF R114==0
+N150 GT1=0
+N160 ENDIF
+;N165 G91 G01 C=R15*360   ;外圆磨  C转速R15 rpm/min
+STAR:
+M08
+N170 R241=R241+R246; R246=X Feed depth per times
+N180 R90=R241
+N190 R245=R320-R241-GT1;磨削时进给深度
+
+;N200 MSG("外圆：第"<<R264<<"工序,还剩"<<R239-1-R253<<"次,进给量"<< R246<<"mm")
+
+N200 MSG("Cylindrical: working procedure:"<<R264<<",  spare "<<R239-1-R253<<"Workpice teeth,  cut"<< R246<<"mm")
+M08
+N210 G90 G0 X=R245+1 F=R115/2   ;磨削进给位置
+N220 G01 X=R245  F20
+N221 G91 G01 Z=-R218*R102 C=R15*360*R218/R16  F=R16
+;N230 G01 Z=R211 F=R16    ;Z轴进给速度R16 mm/min
+N240 G4 F3
+
+N250 NEXT1:
+N260 R248=R248+1  ;修整计数
+N270 IF  R248<>R247 GOTOF STEP2   ;
+
+
+N280 INT0=0
+N290 R248=0
+N300 M9   ;冷却停
+N310 M22  ;修砂轮
+
+;MSG("正在修整砂轮! ! !")
+N320 MSG("Is repair  grinding wheel  " <<CXM<<"")
+N330 MARK1:
+N340 IF INT0==1 GOTOF MARK3
+N350 G4F0.5
+N360 GOTOB MARK1
+N370 STEP2:
+
+N380 M08  ;冷却启动
+
+N390 MARK3:
+
+N400 MSG()
+N410 R253=R253+1;大循环计数
+N420 IF R253>=R239 GOTOF END
+
+;N430 MSG("外圆：第"<<R264<<"工序,还剩"<<R239-1-R253<<"次,进给量"<< R246<<"mm")
+N430 MSG("Cylindrical: working procedure:"<<R264<<",  spare "<<R239-1-R253<<"Workpice teeth,  cut"<< R246<<"mm")
+
+N440 R241=R241+R246; R246=X Feed depth per times
+N450  R90=R241
+N460 R245=R320-R241-GT1;磨削时进给深度
+N470 G90 G01 X=R245 F20
+ G91 G01 Z=R218*R102 C=R15*360*R218/R16  F=R16
+
+;N480  G01 Z=R210 F=R16
+N490 G4 F3
+N500 R248=R248+1;修整计数
+N510 IF  R248<>R247 GOTOF STEP4  ;
+N520 INT0=0
+N530 R248=0
+N540 M9   ;冷却停
+N550 M22  ;修砂轮
+
+;N560 MSG("正在修整砂轮! ! !")
+N560 MSG("Is repair  grinding wheel  " <<CXM<<"")
+N570 MARK11:
+N580 IF INT0==1 GOTOF  STEP4
+N590 G4F0.5
+N600 GOTOB MARK11
+N610 STEP4:
+
+N620 MSG()
+N630 R253=R253+1;大循环计数
+N640 IF R253>=R239 GOTOF END
+
+N650 GOTOB STAR
+
+N660 END:
+N670 M8
+N680 M17
+
+

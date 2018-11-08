@@ -1,0 +1,147 @@
+;$PATH=/_N_CST_DIR
+
+IF R113==2;单向，双向
+  R246=R238/2
+ELSE
+  R246=R238
+ENDIF
+
+BEGIN1:
+
+R242=0 R253=0 R248=0;
+G_FEED=R237*R200; Feed speed
+
+STEP1:
+M08
+R242=0;头数计数!!
+R324=R135 ;=0  C轴起始角
+
+BEGIN2:
+
+IF R114==0;修整补偿
+  GT1=0
+ENDIF
+
+R241=R241+R246; R246=X Feed depth per times
+R90=R241;磨削进给量累计
+R245=R320-R241-GT1+R18 ;磨削时进给深度     ;X-axis offset  R18  2012-01-26增加
+
+
+;N200 MSG("第"<<R264<<"工序,还剩"<<R239-1-R253<<"次,第"<<R242+1<<"头,进给量"<< R246<<"mm")
+
+MSG("working procedure:"<<R264<<", spare "<<R239-1-R253<<"Workpice teeth,  NO."<<R242+1<<"caput,cut"<< R246<<"mm")
+
+IF R100==1
+  IF R79==2;磨左端半扣标记
+    G90 G01 Z=R10 C=ACP(R11)  F3600
+  ELSE 
+    G90 G01 C=ACP(R324)  F3600
+  ENDIF 
+ELSE
+  IF R79==2;磨左端半扣标记
+    G90 G01 Z=R10 C=ACP(R11)  F3600
+  ELSE 
+    G90 G01 C=ACP(R325)  F3600
+  ENDIF 
+ENDIF
+
+G90 G0 X=R245+1 F=R115/2 ;磨削进给位置
+G01 X=R245  F20   
+
+IF R100==2
+  IF R79==1
+    G91 G1 Z=R221  C=ABS(360*R221/R212)  X=-ABS(R221)*R102*TAN(ANG3) F=G_FEED  ;右半扣磨削
+  ELSE
+    G91 G1 Z=R222  C=ABS(360*R222/R212)   X=-ABS(R222)*R102*TAN(ANG3)     F=G_FEED  ;左半扣磨削
+  ENDIF
+  RETRACT
+ELSE
+  G301
+ENDIF
+
+IF R113==2
+  MSG("反向磨削,第"<<R264<<"工序,第"<<R242+1<<"头,进给量"<<R246<<"mm")
+  R241=R241+R246; R246=X Feed depth per times
+  R245=R320-R241-GT1+R18;磨削时进给深度
+  G90 G1 X=R245 F20  ;磨削进给位置
+  G302
+  R131=$AC_DRF[X] R133=$AC_DRF[Z]
+  GOTOF NEXT0
+ENDIF
+
+RETRACT
+NEXT0:
+R242=R242+1;头数计数
+IF R242>=R101 GOTOF NEXT1
+R241=R241-R238
+R324=R324+R208
+IF R324>=360
+R324=R324-360
+ENDIF
+
+IF R100==1
+G300
+ELSE
+G310
+
+
+N680 GOTOB BEGIN2
+
+N690 NEXT1:
+N700 R248=R248+1;修整计数
+N710 IF R248<>R247 GOTOF STEP2   ;
+
+;IF R79==1 GOTOF STEP2  ;;20120117改
+ 
+INT0=0
+R248=0
+M9   ;冷却停
+DRESSER1  ;修砂轮
+
+G300
+;MSG("正在修整砂轮! ! !")
+MSG("Is repair  grinding wheel  " <<CXM<<"")
+MARK1:
+IF INT0==1 GOTOF MARK3
+G4F0.5
+GOTOB MARK1
+STEP2:
+;N830 IF $A_IN[3]==0 GOTOF MARK3  ;K10-强修
+GOTOF MARK3  
+M08  ;冷却启动
+;;N840 INT0=0    ;;印度暂屏蔽 
+;;N850 R248=0
+;;N860 M9 ;冷却停
+;;N870 DRESSER1 ;修砂轮
+;;N880 G300
+;;MSG("正在修整砂轮! ! ")
+;;N890 MSG("Is repair  grinding wheel ! ! !")
+;;N900 MARK2:
+;;N910 IF INT0==1 GOTOF MARK3
+;;N920 G4F0.5
+;;N930 GOTOB MARK2
+
+MARK3:
+
+IF R79<>2
+  IF R100==1
+    G300
+  ELSE
+    G310
+  ENDIF
+ELSE
+  G90 G01 Z=R10 C=ACP(R11)  F3600
+ENDIF
+
+
+;TY1=1
+MSG()
+R253=R253+1;大循环计数
+IF R253>=R239 GOTOF END
+GOTOB STEP1
+
+END:
+M8
+M17
+
+
